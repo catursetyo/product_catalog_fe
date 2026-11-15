@@ -6,10 +6,14 @@ import DeleteDialog from "./components/DeleteDialog.jsx";
 
 export default function App() {
   const [products, setProducts] = useState(seed);
+  const [query, setQuery] = useState("");
   const [modal, setModal] = useState(null);
   const close = () => setModal(null);
 
   const target = modal?.id ? products.find((p) => p.id === modal.id) : null;
+  const shown = products.filter((p) =>
+    p.name.toLowerCase().includes(query.trim().toLowerCase())
+  );
 
   const save = (name, price) => {
     setProducts((ps) =>
@@ -55,13 +59,17 @@ export default function App() {
                 <circle cx="11" cy="11" r="7" />
                 <path d="m20 20-3.5-3.5" />
               </svg>
-              <input placeholder="Cari nama produk..." />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Cari nama produk..."
+              />
             </label>
             <span className="count">{products.length} produk</span>
           </div>
 
           <div className="grid">
-            {products.map((p) => (
+            {shown.map((p) => (
               <ProductCard
                 key={p.id}
                 product={p}
@@ -71,8 +79,12 @@ export default function App() {
             ))}
           </div>
 
+          {shown.length === 0 && (
+            <p className="empty">Produk tidak ditemukan.</p>
+          )}
+
           <p className="panel-foot">
-            Menampilkan {products.length} dari {products.length} produk
+            Menampilkan {shown.length} dari {products.length} produk
           </p>
         </section>
       </main>
