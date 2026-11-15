@@ -92,6 +92,70 @@
     .btn-del { flex: 1; background: #fdecef; color: #e11d48; border-color: #f8c9d3; }
 
     .panel-foot { margin: 18px 0 0; font-size: 12px; color: #94a3b8; }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: grid;
+      place-items: center;
+      padding: 16px;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      width: 340px;
+      max-width: 100%;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+    }
+    .modal-center { text-align: center; }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .modal h3 { margin: 0; font-size: 16px; }
+    .modal-sub { margin: 4px 0 14px; font-size: 12px; color: #64748b; }
+    .modal-id { margin: 0 0 10px; font-size: 12px; color: #94a3b8; }
+    .icon-btn {
+      background: none;
+      border: 0;
+      padding: 0;
+      font-size: 18px;
+      line-height: 1;
+      color: #64748b;
+      cursor: pointer;
+    }
+    .field { display: block; margin-bottom: 12px; font-size: 12px; color: #334155; }
+    .field span { display: block; margin-bottom: 4px; font-weight: 600; }
+    .field input {
+      width: 100%;
+      font: inherit;
+      font-size: 13px;
+      padding: 8px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .field small { font-size: 11px; color: #94a3b8; }
+    .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .modal-actions .btn { flex: 1; }
+    .btn-outline { background: #fff; border-color: #e2e8f0; color: #334155; }
+    .btn-danger { background: #e11d48; color: #fff; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .trash {
+      width: 44px;
+      height: 44px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      background: #fdecef;
+      color: #e11d48;
+      display: grid;
+      place-items: center;
+    }
+    .confirm-name {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 0;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -110,9 +174,112 @@
     ];
 
     const rupiah = (n) => "Rp" + n.toLocaleString("id-ID");
+    const nextId = (ps) =>
+      "ID-" + (Math.max(0, ...ps.map((p) => Number(p.id.slice(3)))) + 1);
+
+    function Modal({ children, center }) {
+      return (
+        <div className="overlay">
+          <div className={"modal" + (center ? " modal-center" : "")}>{children}</div>
+        </div>
+      );
+    }
+
+    function ProductForm({ title, sub, product, onSave, onClose }) {
+      const [name, setName] = React.useState(product ? product.name : "");
+      const [price, setPrice] = React.useState(product ? String(product.price) : "");
+      const valid = name.trim() !== "" && price !== "" && Number(price) >= 0;
+
+      return (
+        <Modal>
+          <div className="modal-head">
+            <h3>{title}</h3>
+            <button className="icon-btn" onClick={onClose} aria-label="Tutup">
+              ×
+            </button>
+          </div>
+          <p className="modal-sub">{sub}</p>
+          {product && <p className="modal-id">{product.id}</p>}
+          <label className="field">
+            <span>Nama Produk</span>
+            <input
+              autoFocus
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Contoh: Pulpen"
+            />
+          </label>
+          <label className="field">
+            <span>Harga (Rp)</span>
+            <input
+              type="number"
+              min="0"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="Contoh: 5000"
+            />
+            <small>Isi harga dalam Rupiah, tanpa titik.</small>
+          </label>
+          <div className="modal-actions">
+            <button className="btn btn-outline" onClick={onClose}>
+              Batal
+            </button>
+            <button
+              className="btn btn-primary"
+              disabled={!valid}
+              onClick={() => onSave(name.trim(), Number(price))}
+            >
+              {product ? "Simpan Perubahan" : "Simpan Produk"}
+            </button>
+          </div>
+        </Modal>
+      );
+    }
+
+    function DeleteDialog({ product, onConfirm, onClose }) {
+      return (
+        <Modal center>
+          <div className="trash">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M3 6h18M9 6V4h6v2M5 6l1 14h12l1-14" />
+            </svg>
+          </div>
+          <h3>Hapus Produk?</h3>
+          <p className="modal-sub">Produk yang dihapus tidak dapat dikembalikan.</p>
+          <p className="confirm-name">{product.name}</p>
+          <div className="modal-actions">
+            <button className="btn btn-outline" onClick={onClose}>
+              Batal
+            </button>
+            <button className="btn btn-danger" onClick={onConfirm}>
+              Hapus Produk
+            </button>
+          </div>
+        </Modal>
+      );
+    }
 
     function App() {
-      const [products] = React.useState(seed);
+      const [products, setProducts] = React.useState(seed);
+      const [modal, setModal] = React.useState(null);
+      const close = () => setModal(null);
+
+      const save = (name, price) => {
+        setProducts((ps) =>
+          modal.type === "add"
+            ? [...ps, { id: nextId(ps), name, price }]
+            : ps.map((p) => (p.id === modal.id ? { ...p, name, price } : p))
+        );
+        close();
+      };
+
+      const remove = () => {
+        setProducts((ps) => ps.filter((p) => p.id !== modal.id));
+        close();
+      };
+
+      const target = modal && modal.id ? products.find((p) => p.id === modal.id) : null;
 
       return (
         <>
@@ -123,7 +290,9 @@
                   <h1>Manajemen Produk</h1>
                   <p className="sub">Kelola daftar produk dan harga dalam satu tempat.</p>
                 </div>
-                <button className="btn btn-primary">+ Tambah Produk</button>
+                <button className="btn btn-primary" onClick={() => setModal({ type: "add" })}>
+                  + Tambah Produk
+                </button>
               </div>
 
               <div className="toolbar">
@@ -145,8 +314,18 @@
                     <h2 className="card-name">{p.name}</h2>
                     <p className="card-price">{rupiah(p.price)}</p>
                     <div className="card-actions">
-                      <button className="btn btn-edit">Edit</button>
-                      <button className="btn btn-del">Hapus</button>
+                      <button
+                        className="btn btn-edit"
+                        onClick={() => setModal({ type: "edit", id: p.id })}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="btn btn-del"
+                        onClick={() => setModal({ type: "delete", id: p.id })}
+                      >
+                        Hapus
+                      </button>
                     </div>
                   </article>
                 ))}
@@ -157,6 +336,27 @@
               </p>
             </section>
           </main>
+
+          {modal && modal.type === "add" && (
+            <ProductForm
+              title="Tambah Produk"
+              sub="Masukkan informasi produk baru."
+              onSave={save}
+              onClose={close}
+            />
+          )}
+          {modal && modal.type === "edit" && (
+            <ProductForm
+              title="Edit Produk"
+              sub="Perbarui informasi produk yang sudah ada."
+              product={target}
+              onSave={save}
+              onClose={close}
+            />
+          )}
+          {modal && modal.type === "delete" && (
+            <DeleteDialog product={target} onConfirm={remove} onClose={close} />
+          )}
         </>
       );
     }
