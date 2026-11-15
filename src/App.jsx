@@ -31,6 +31,33 @@ export default function App() {
 
   return (
     <>
+      <header className="topbar">
+        <div className="topbar-inner">
+          <a className="brand" href="/">
+            <img className="brand-mark" src="/logo.png" alt="" />
+            <span className="brand-name">BukanLapak</span>
+          </a>
+          <label className="search">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3.5-3.5" />
+            </svg>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Cari nama produk..."
+            />
+          </label>
+        </div>
+      </header>
+
       <main className="container">
         <section className="panel">
           <div className="panel-head">
@@ -47,24 +74,6 @@ export default function App() {
           </div>
 
           <div className="toolbar">
-            <label className="search">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <circle cx="11" cy="11" r="7" />
-                <path d="m20 20-3.5-3.5" />
-              </svg>
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Cari nama produk..."
-              />
-            </label>
             <span className="count">{products.length} produk</span>
           </div>
 
