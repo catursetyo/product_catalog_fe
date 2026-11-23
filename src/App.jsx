@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router";
 import PageLayout from "./components/templates/PageLayout/index.jsx";
 import ProductsPage from "./components/pages/ProductsPage/index.jsx";
 import ProductDetailPage from "./components/pages/ProductDetailPage/index.jsx";
+import NotFoundPage from "./components/pages/NotFoundPage/index.jsx";
 
 export default function App() {
   return (
@@ -10,6 +11,7 @@ export default function App() {
         <Route index element={<Navigate to="/products" replace />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="products/:id" element={<ProductDetailPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
   );
