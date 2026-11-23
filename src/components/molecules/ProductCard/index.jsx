@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import Button from "../../atoms/Button/index.jsx";
 import { formatRupiah } from "../../../utils/formatRupiah.js";
 
@@ -9,7 +10,9 @@ export default function ProductCard({ product, onEdit, onDelete }) {
       </span>
 
       <h2 className="mt-2 text-base font-semibold wrap-break-word">
-        {product.name}
+        <Link to={`/products/${product.id}`} className="hover:text-brand">
+          {product.name}
+        </Link>
       </h2>
       <p className="mt-1 text-lg font-bold text-brand">
         {formatRupiah(product.price)}
@@ -32,6 +35,12 @@ export default function ProductCard({ product, onEdit, onDelete }) {
             Hapus
           </Button>
         </div>
+        <Link
+          to={`/products/${product.id}`}
+          className="mt-2 block text-center text-xs font-semibold text-brand hover:underline"
+        >
+          Lihat detail
+        </Link>
       </div>
     </article>
   );
